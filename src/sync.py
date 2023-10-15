@@ -4,16 +4,16 @@ import subprocess
 import requests
 import json
 
-def extract_related_tools_section(filename):
+def extract_related_tools_section(filename, start_tag="<!--START_TAG-->", end_tag="<!--END_TAG-->"):
     with open(filename, 'r') as file:
         content = file.read()
 
-    related_tools_pattern = re.compile(r'## Related Tools\n\n.*?(?=##|$)', re.DOTALL)
+    related_tools_pattern = re.compile(rf'{re.escape(start_tag)}(.*?){re.escape(end_tag)}', re.DOTALL)
     match = related_tools_pattern.search(content)
     if match:
-        return match.group(0).strip()
+        return match.group(1).strip()  # Return only the content between the tags
     else:
-        raise ValueError("Missing 'Related Tools' section")
+        raise ValueError(f"Missing section between {start_tag} and {end_tag}")
 
 def create_pull_request(repo_url, branch_name, token):
     headers = {
@@ -30,7 +30,7 @@ def create_pull_request(repo_url, branch_name, token):
     if response.status_code != 201:
         raise Exception(f"Failed to create pull request: {response.text}")
 
-def update_repository(repo_url, related_tools_section):
+def update_repository(repo_url, related_tools_section, start_tag="<!--START_TAG-->", end_tag="<!--END_TAG-->"):
     repo_name = repo_url.split('/')[-1]
     branch_name = "update-related-tools"
     
@@ -44,10 +44,12 @@ def update_repository(repo_url, related_tools_section):
     # Create a new branch
     subprocess.run(['git', '-C', repo_name, 'checkout', '-b', branch_name])
     
-    # Replace the "Related Tools" section in README.md
+    # Replace the content between the tags in README.md
     with open(f'{repo_name}/README.md', 'r') as file:
         content = file.read()
-    new_content = re.sub(r'## Related Tools\n\n.*?(?=##|$)', related_tools_section, content, flags=re.DOTALL)
+    pattern = rf"{re.escape(start_tag)}.*?{re.escape(end_tag)}"
+    replacement = f"{start_tag}\n{related_tools_section}\n{end_tag}"
+    new_content = re.sub(pattern, replacement, content, flags=re.DOTALL)
     with open(f'{repo_name}/README.md', 'w') as file:
         file.write(new_content)
     

@@ -1,5 +1,3 @@
-
-
 # noteutilsyncer
 
 `noteutilsyncer` is a utility designed to centralize and synchronize the "Related Tools" section across the Note Utilities Ecosystem. By maintaining a single source of truth for all project READMEs, it ensures consistency and ease of management across the ecosystem. Whenever a new tool is added or an existing one is updated, `noteutilsyncer` automates the process of updating the "Related Tools" section in all associated repositories.
@@ -53,12 +51,14 @@
 
 ## Related Tools
 
+<!--START_TAG-->
 **Note Utilities Ecosystem**: A suite of tools designed to streamline and enhance your note-taking and information processing workflows.
 
 - **noteutilsyncer**: Centralizes and synchronizes the "Related Tools" section across the ecosystem.
 - **[workflowlibrary](https://github.com/m-c-frank/workflowlibrary)**: A curated catalog of GitHub Actions workflows.
 - **[conceptsplitter](https://github.com/m-c-frank/conceptsplitter)**: Extract atomic concepts from a given text using the OpenAI API.
 - **[textdownloader](https://github.com/m-c-frank/textdownloader)**: A browser extension to automatically generate text dumps for processing.
+<!--END_TAG-->
 
 ## Contributing
 
