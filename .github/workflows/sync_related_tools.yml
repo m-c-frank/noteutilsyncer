@@ -12,9 +12,6 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Grant execute permission to the script
-      run: chmod +x ./update_related_tools.sh
-
     - name: Set up Git for pushing
       run: |
         git config --global user.name 'GitHub Action'
