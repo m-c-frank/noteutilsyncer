@@ -51,14 +51,8 @@
 
 ## Related Tools
 
-<!--START_TAG-->
-**Note Utilities Ecosystem**: A suite of tools designed to streamline and enhance your note-taking and information processing workflows.
+**[Check the complete list of utils here](https://gist.github.com/m-c-frank/5b7a099c0998e3030888125370b26195)**
 
-- **noteutilsyncer**: Centralizes and synchronizes the "Related Tools" section across the ecosystem.
-- **[workflowlibrary](https://github.com/m-c-frank/workflowlibrary)**: A curated catalog of GitHub Actions workflows.
-- **[conceptsplitter](https://github.com/m-c-frank/conceptsplitter)**: Extract atomic concepts from a given text using the OpenAI API.
-- **[textdownloader](https://github.com/m-c-frank/textdownloader)**: A browser extension to automatically generate text dumps for processing.
-<!--END_TAG-->
 
 ## Contributing
 
