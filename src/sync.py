@@ -4,16 +4,24 @@ import subprocess
 import requests
 import json
 
-def extract_related_tools_section(filename, start_tag="<!--START_TAG-->", end_tag="<!--END_TAG-->"):
+def extract_related_tools_section(filename):
     with open(filename, 'r') as file:
         content = file.read()
 
-    related_tools_pattern = re.compile(rf'{re.escape(start_tag)}(.*?){re.escape(end_tag)}', re.DOTALL)
-    match = related_tools_pattern.search(content)
-    if match:
-        return match.group(1).strip()  # Return only the content between the tags
-    else:
+    start_tag = "<!--START_TAG-->"
+    end_tag = "<!--END_TAG-->"
+
+    start_index = content.find(start_tag)
+    end_index = content.find(end_tag)
+
+    if start_index == -1 or end_index == -1:
         raise ValueError(f"Missing section between {start_tag} and {end_tag}")
+
+    # Extract the content between the tags
+    related_tools_section = content[start_index + len(start_tag):end_index].strip()
+
+    return related_tools_section
+
 
 def create_pull_request(repo_url, branch_name, token):
     headers = {
