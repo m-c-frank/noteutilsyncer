@@ -4,7 +4,6 @@ on:
   workflow_dispatch:  # Allows manual triggering
   schedule:
     - cron: '0 0 * * *'  # Runs every day at midnight
-
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -20,9 +19,10 @@ jobs:
     - name: Fetch Gist content and update README
       run: ./update_related_tools.sh
 
-    - name: Commit and push if there's a change
+    - name: Run sync.py if there's a change
       run: |
-        git diff --quiet || (git add . && git commit -m "Updated Related Tools section" && git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/m-c-frank/noteutilsyncer.git && git push)
+        if ! git diff --quiet; then
+          python src/sync.py
+        fi
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_PAT }}
-    
+        GH_PAT: ${{ secrets.GH_PAT }}
