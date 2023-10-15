@@ -9,12 +9,19 @@ def replace_token_with_links(repo_names):
     readme_path = "README.md"
     with open(readme_path, 'r') as file:
         content = file.read()
+
+    start_token = "<!--START_TOKEN-->"
+    end_token = "<!--END_TOKEN-->"
     
-    if "<RELATED_UTILITIES>" not in content:
+    start_index = content.find(start_token)
+    end_index = content.find(end_token)
+
+    # If tokens are not found, just return without making changes
+    if start_index == -1 or end_index == -1:
         return
 
     new_section = create_related_tools_section(repo_names)
-    updated_content = content.replace("<RELATED_UTILITIES>", new_section)
+    updated_content = content[:start_index+len(start_token)] + new_section + content[end_index:]
 
     with open(readme_path, 'w') as file:
         file.write(updated_content)
