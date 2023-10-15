@@ -30,12 +30,17 @@ def update_current_readme(repo_names):
 
 def main():
     repo_names = fetch_gist_content()
-    update_current_readme(repo_names)
-
+    
     # Excluding the current repository from the list
-    repo_names.remove("noteutilsyncer")
-    for repo in repo_names:
-        print(repo)
+    if "noteutilsyncer" in repo_names:
+        repo_names.remove("noteutilsyncer")
+
+    # Write the repo names to repos.txt
+    with open("repos.txt", "w") as f:
+        for repo in repo_names:
+            f.write(f"{repo}\n")
+
+    update_current_readme(repo_names)
 
 
 if __name__ == "__main__":
