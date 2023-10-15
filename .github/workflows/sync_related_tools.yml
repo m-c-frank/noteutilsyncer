@@ -25,6 +25,7 @@ jobs:
 
     - name: Commit and push if there's a change
       run: |
-        git diff --quiet || (git add . && git commit -m "Updated Related Tools section" && git push)
+        git diff --quiet || (git add . && git commit -m "Updated Related Tools section" && git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/m-c-frank/noteutilsyncer.git && git push)
       env:
         GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+    
