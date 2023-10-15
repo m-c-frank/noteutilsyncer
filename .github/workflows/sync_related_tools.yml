@@ -1,28 +1,19 @@
-name: Sync Related Tools Section
+name: Sync Related Tools Section from Gist
 
 on:
   workflow_dispatch:  # Allows manual triggering
   schedule:
     - cron: '0 0 * * *'  # Runs every day at midnight
+
 jobs:
   sync:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Set up Git for pushing
-      run: |
-        git config --global user.name 'GitHub Action'
-        git config --global user.email 'action@github.com'
-
-    - name: Fetch Gist content and update README
-      run: ./update_related_tools.sh
-
-    - name: Run sync.py if there's a change
-      run: |
-        if ! git diff --quiet; then
-          python src/sync.py
-        fi
+    - name: Sync "Related Tools" section and update other repos
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
+      run: ./scripts/sync_related_tools.sh
