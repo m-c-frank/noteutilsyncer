@@ -10,11 +10,11 @@ def replace_token_with_links(repo_names):
     with open(readme_path, 'r') as file:
         content = file.read()
     
-    if "<SPECIAL_TOKEN>" not in content:
+    if "<RELATED_UTILITIES>" not in content:
         return
 
     new_section = create_related_tools_section(repo_names)
-    updated_content = content.replace("<SPECIAL_TOKEN>", new_section)
+    updated_content = content.replace("<RELATED_UTILITIES>", new_section)
 
     with open(readme_path, 'w') as file:
         file.write(updated_content)
