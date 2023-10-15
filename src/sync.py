@@ -6,10 +6,6 @@ import subprocess
 import requests
 import json
 
-TOKEN = os.environ.get('GH_PAT')
-if not TOKEN:
-    raise ValueError("Missing GitHub PAT token!")
-
 def extract_related_tools_section(filename):
     with open(filename, 'r') as file:
         content = file.read()
@@ -21,9 +17,9 @@ def extract_related_tools_section(filename):
     else:
         raise ValueError("Missing 'Related Tools' section")
 
-def create_pull_request(repo_url, branch_name):
+def create_pull_request(repo_url, branch_name, token):
     headers = {
-        'Authorization': f'token {TOKEN}',
+        'Authorization': f'token {token}',
         'Accept': 'application/vnd.github.v3+json'
     }
     data = {
@@ -45,7 +41,7 @@ def update_repository(repo_url, related_tools_section):
     subprocess.run(['git', 'config', '--global', 'user.email', 'action@github.com'])
     
     # Clone the repository
-    subprocess.run(['git', 'clone', f'https://{TOKEN}@github.com/{repo_url}.git'])
+    subprocess.run(['git', 'clone', f'https://github.com/{repo_url}.git'])
     
     # Create a new branch
     subprocess.run(['git', '-C', repo_name, 'checkout', '-b', branch_name])
@@ -62,9 +58,11 @@ def update_repository(repo_url, related_tools_section):
     subprocess.run(['git', '-C', repo_name, 'commit', '-m', 'Update Related Tools section'])
     subprocess.run(['git', '-C', repo_name, 'push', 'origin', branch_name])
     
-    # Create a pull request
-    create_pull_request(repo_url, branch_name)
-
+    # Fetch the token and create a pull request
+    token = os.environ.get('GH_PAT')
+    if not token:
+        raise ValueError("Missing GitHub PAT token!")
+    create_pull_request(repo_url, branch_name, token)
 
 def extract_repo_url_from_readme(filename):
     with open(filename, 'r') as file:
