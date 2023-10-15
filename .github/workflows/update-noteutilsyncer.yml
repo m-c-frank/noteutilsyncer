@@ -1,0 +1,45 @@
+name: Update README in noteutilsyncer
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'README.md'
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Extract repository owner from GITHUB_REPOSITORY
+      run: echo "REPO_OWNER=$(echo $GITHUB_REPOSITORY | cut -d '/' -f1)" >> $GITHUB_ENV
+
+    - name: Clone NoteUtilSyncer repository (if not the current repo)
+      if: github.repository != '${{ env.REPO_OWNER }}/NoteUtilSyncer'
+      run: git clone https://github.com/${{ env.REPO_OWNER }}/NoteUtilSyncer.git
+
+    - name: Set up directory paths
+      run: |
+        if [[ "${{ github.repository }}" == "${{ env.REPO_OWNER }}/NoteUtilSyncer" ]]; then
+          NOTEUTILSYNCER_DIR=$GITHUB_WORKSPACE
+        else
+          NOTEUTILSYNCER_DIR=$GITHUB_WORKSPACE/NoteUtilSyncer
+        fi
+        echo "NOTEUTILSYNCER_DIR=$NOTEUTILSYNCER_DIR" >> $GITHUB_ENV
+
+    - name: Copy README to NoteUtilSyncer
+      run: |
+        cp README.md $NOTEUTILSYNCER_DIR/READMEs/${{ github.repository_name }}.md
+
+    - name: Commit and push to NoteUtilSyncer
+      run: |
+        cd $NOTEUTILSYNCER_DIR
+        git config user.name "GitHub Action"
+        git config user.email "action@github.com"
+        git add READMEs/${{ github.repository_name }}.md
+        git commit -m "Update README for ${{ github.repository_name }}"
+        git push https://${{ secrets.GH_PAT }}@github.com/${{ env.REPO_OWNER }}/NoteUtilSyncer.git main

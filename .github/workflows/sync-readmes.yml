@@ -1,0 +1,26 @@
+name: Sync READMEs in Note Utilities Ecosystem
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'READMEs/*.md'
+
+jobs:
+  sync-readmes:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Setup GitHub CLI
+      uses: cli/cli/setup-gh@v1
+
+    - name: Run NoteUtilSyncer
+      env:
+        GH_PAT: ${{ secrets.GH_PAT }}
+      run: |
+        chmod +x sync.sh
+        ./sync.sh
