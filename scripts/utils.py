@@ -1,40 +1,56 @@
 import requests
 
-GIST_URL = "https://gist.githubusercontent.com/m-c-frank/5b7a099c0998e3030888125370b26195/raw"
+GIST_URL = "https://gist.githubusercontent.com/m-c-frank/5b7a099c0998e3030888125370b26195/raw/"
 
 
-def fetch_gist_content():
+def fetch_gist_content(url=GIST_URL):
     """
     Fetch the content of the gist.
     """
-    response = requests.get(GIST_URL)
+    response = requests.get(url)
     response.raise_for_status()
     return response.text
 
 
-def format_related_tools_section(gist_content):
+def split_gist_into_repos(gist_content):
     """
-    Format the gist content into the "Related Tools" section format.
+    Split the gist content into a list of repo names.
     """
-    repo_names = gist_content.strip().split('\n')
-    formatted_tools = "\n".join([f"- **[{name}](https://github.com/m-c-frank/{name})**" for name in repo_names])
-    
+    return gist_content.strip().split('\n')
+
+
+def format_related_tool(repo_name):
+    """
+    Format a single repo name into the "Related Tools" section format.
+    """
+    return f"- **[{repo_name}](https://github.com/m-c-frank/{repo_name})**"
+
+
+def create_related_tools_section(repo_names):
+    """
+    Create the "Related Tools" section using the given repo names.
+    """
+    formatted_tools = "\n".join([format_related_tool(name) for name in repo_names])
     section = f"<!--START_TAG-->\n**Note Utilities Ecosystem**: A suite of tools designed to streamline and enhance your note-taking and information processing workflows.\n\n{formatted_tools}\n<!--END_TAG-->"
-    
     return section
 
 
-def extract_current_related_tools_section(readme_content):
+def extract_section_from_content(content, start_tag="<!--START_TAG-->", end_tag="<!--END_TAG-->"):
     """
-    Extract the current "Related Tools" section from the given README content.
+    Extract content between the given start and end tags.
     """
-    start_tag = "<!--START_TAG-->"
-    end_tag = "<!--END_TAG-->"
-    
-    start_index = readme_content.find(start_tag) + len(start_tag)
-    end_index = readme_content.find(end_tag)
-    
-    return readme_content[start_index:end_index].strip()
+    start_index = content.find(start_tag) + len(start_tag)
+    end_index = content.find(end_tag)
+    return content[start_index:end_index].strip()
+
+
+def replace_section_in_content(content, new_section, start_tag="<!--START_TAG-->", end_tag="<!--END_TAG-->"):
+    """
+    Replace the content between the given start and end tags with the new_section.
+    """
+    start_index = content.find(start_tag)
+    end_index = content.find(end_tag) + len(end_tag)
+    return content[:start_index] + new_section + content[end_index:]
 
 
 def check_and_update_readme():
@@ -46,12 +62,14 @@ def check_and_update_readme():
     # Fetch the content of the current README (this could be done using file operations)
     with open('README.md', 'r') as f:
         current_readme_content = f.read()
+
+    current_section = extract_section_from_content(current_readme_content)
     
-    current_section = extract_current_related_tools_section(current_readme_content)
-    new_section = format_related_tools_section(fetch_gist_content())
+    repo_names = split_gist_into_repos(fetch_gist_content())
+    new_section = create_related_tools_section(repo_names)
     
     if current_section != new_section:
-        updated_readme_content = current_readme_content.replace(current_section, new_section)
+        updated_readme_content = replace_section_in_content(current_readme_content, new_section)
         
         with open('README.md', 'w') as f:
             f.write(updated_readme_content)
@@ -59,4 +77,3 @@ def check_and_update_readme():
         return True
     
     return False
-
