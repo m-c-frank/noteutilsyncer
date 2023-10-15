@@ -1,6 +1,7 @@
 name: Sync Related Tools Section
 
 on:
+  workflow_dispatch:  # Allows manual triggering
   schedule:
     - cron: '0 0 * * *'  # Runs every day at midnight
 
@@ -11,10 +12,8 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Fetch Gist content
-      run: |
-        GIST_CONTENT=$(curl -s https://gist.githubusercontent.com/m-c-frank/5b7a099c0998e3030888125370b26195/raw/)
-        # Use some method (e.g., a script) to replace the "Related Tools" section in README.md with $GIST_CONTENT
+    - name: Fetch Gist content and update README
+      run: ./update_related_tools.sh
 
     - name: Commit and push if there's a change
       run: |
