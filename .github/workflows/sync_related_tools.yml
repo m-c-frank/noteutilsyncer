@@ -26,4 +26,4 @@ jobs:
     - name: Sync "Related Tools" section and update other repos
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
-      run: python sync_related_tools.py
+      run: python scripts/sync_related_tools.py
