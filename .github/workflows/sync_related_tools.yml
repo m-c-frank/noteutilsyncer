@@ -8,35 +8,36 @@ on:
 jobs:
   sync:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up GitHub CLI
-        run: gh auth login --with-token <<< "${{ secrets.GH_PAT }}"
+      - name: Install GitHub CLI
+        run: sudo apt-get install gh
 
-      - name: Update Related Tools in this repo and create PR
+      - name: Update Related Tools in this repo and open PR
         run: |
           git config --global user.name 'GitHub Action'
           git config --global user.email 'action@github.com'
-          git checkout -b update-related-tools
-          python scripts/sync_related_tools.py > repos.txt
+          python scripts/sync_related_tools.py
+          git checkout -b related-tools-update
           git add README.md
           git commit -m 'Update Related Tools section from Gist' || echo "No changes to commit"
-          git push --set-upstream origin update-related-tools
-          gh pr create --base main --head update-related-tools --title "Update Related Tools section from Gist" --body "Automated update of the Related Tools section."
+          git push "https://${{ secrets.GH_PAT }}@github.com/m-c-frank/noteutilsyncer.git" related-tools-update
+          gh pr create --title "Update Related Tools section from Gist" --body "Automated update of the Related Tools section." --head related-tools-update --base main
 
-      - name: Update Related Tools in other repos and create PRs
+      - name: Update Related Tools in other repos and open PRs
         run: |
           while read -r repo; do
-            gh repo clone m-c-frank/$repo temp_repo
+            git clone "https://github.com/m-c-frank/$repo.git" temp_repo
             cd temp_repo
-            git checkout -b update-related-tools
             python ../scripts/sync_related_tools.py
+            git checkout -b related-tools-update
             git add README.md
             git commit -m 'Update Related Tools section from Gist' || echo "No changes to commit"
-            git push --set-upstream origin update-related-tools
-            gh pr create --base main --head update-related-tools --title "Update Related Tools section from Gist" --body "Automated update of the Related Tools section."
+            git push "https://${{ secrets.GH_PAT }}@github.com/m-c-frank/$repo.git" related-tools-update
+            gh pr create --title "Update Related Tools section from Gist" --body "Automated update of the Related Tools section." --head related-tools-update --base main
             cd ..
             rm -rf temp_repo
           done < ../repos.txt
