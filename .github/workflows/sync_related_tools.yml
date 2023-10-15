@@ -16,28 +16,33 @@ jobs:
       - name: Install GitHub CLI
         run: sudo apt-get install gh
 
-      - name: Update Related Tools in this repo and open PR
-        run: |
-          git config --global user.name 'GitHub Action'
-          git config --global user.email 'action@github.com'
-          python scripts/sync_related_tools.py
-          git checkout -b related-tools-update
-          git add README.md
-          git commit -m 'Update Related Tools section from Gist' || echo "No changes to commit"
-          git push "https://${{ secrets.GH_PAT }}@github.com/m-c-frank/noteutilsyncer.git" related-tools-update
-          gh pr create --title "Update Related Tools section from Gist" --body "Automated update of the Related Tools section." --head related-tools-update --base main
+      - name: Fetch list of repositories
+        run: python scripts/fetch_gist_repos.py
 
-      - name: Update Related Tools in other repos and open PRs
+      - name: Clone and update each repository
         run: |
           while read -r repo; do
+            echo "Processing $repo"
             git clone "https://github.com/m-c-frank/$repo.git" temp_repo
             cd temp_repo
-            python ../scripts/sync_related_tools.py
+            python ../scripts/update_readme.py
+            cd ..
+          done < repos.txt
+
+      - name: Check for changes, commit, push, and create PR
+        run: |
+          while read -r repo; do
+            cd temp_repo
+            if git diff --exit-code; then
+              echo "No changes to commit for $repo"
+              cd ..
+              rm -rf temp_repo
+              continue
+            fi
             git checkout -b related-tools-update
-            git add README.md
-            git commit -m 'Update Related Tools section from Gist' || echo "No changes to commit"
+            git commit -am 'Update Related Tools section from Gist'
             git push "https://${{ secrets.GH_PAT }}@github.com/m-c-frank/$repo.git" related-tools-update
             gh pr create --title "Update Related Tools section from Gist" --body "Automated update of the Related Tools section." --head related-tools-update --base main
             cd ..
             rm -rf temp_repo
-          done < ../repos.txt
+          done < repos.txt
