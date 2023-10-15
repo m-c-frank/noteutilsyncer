@@ -4,7 +4,8 @@ on:
   workflow_dispatch:
   schedule:
     - cron: '0 0 * * *'
-
+env:
+    GH_TOKEN: ${{ secrets.GH_PAT }}
 jobs:
   sync:
     runs-on: ubuntu-latest
