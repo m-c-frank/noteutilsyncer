@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import os
 import re
 import subprocess
@@ -76,23 +74,31 @@ def extract_repo_url_from_readme(filename):
         raise ValueError(f"Missing GitHub URL in {filename}")
 
 if __name__ == "__main__":
+    # Fetch the token
+    token = os.environ.get('GH_PAT')
+    if not token:
+        raise ValueError("Missing GitHub PAT token!")
+
     # Extract the "Related Tools" section from the current repository's README
     related_tools_section = extract_related_tools_section('README.md')
     
     # Dynamically fetch the list of repositories from the READMEs folder
     repositories = []
-    for filename in os.listdir('READMEs'):
-        if filename.endswith('.md'):
-            try:
-                repo = extract_repo_url_from_readme(f'READMEs/{filename}')
-                repositories.append(repo)
-            except ValueError as e:
-                print(e)
+    if os.path.exists('READMEs'):
+        for filename in os.listdir('READMEs'):
+            if filename.endswith('.md'):
+                try:
+                    repo = extract_repo_url_from_readme(f'READMEs/{filename}')
+                    repositories.append(repo)
+                except ValueError as e:
+                    print(e)
+    else:
+        print("READMEs directory not found!")
 
     # Update each repository
     for repo in repositories:
         try:
-            update_repository(repo, related_tools_section)
+            update_repository(repo, related_tools_section, token)
             print(f"Updated {repo} successfully!")
         except Exception as e:
             print(f"Failed to update {repo}. Reason: {e}")

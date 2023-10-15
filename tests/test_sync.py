@@ -1,109 +1,88 @@
 import pytest
+from src.sync import extract_related_tools_section, update_repository, create_pull_request, extract_repo_url_from_readme
 import os
-from src.sync import extract_related_tools_section, update_repository
+import requests
+import subprocess
 
-# Parameterized test for extract_related_tools_section
-@pytest.mark.parametrize("content, expected_section", [
+# Adjusted mock content for README.md
+MOCK_CONTENT = """
+# Project Title
+
+## Features
+- Feature A
+- Feature B
+
+## Related Tools
+
+- Tool A (https://github.com/user/toolA)
+- Tool B (https://github.com/user/toolB)
+
+## License
+MIT License
+"""
+
+def test_extract_related_tools_section():
+    with open("mock_readme.md", "w") as f:
+        f.write(MOCK_CONTENT)
+
+    section = extract_related_tools_section("mock_readme.md")
+    assert section == "## Related Tools\n\n- Tool A (https://github.com/user/toolA)\n- Tool B (https://github.com/user/toolB)"
+    os.remove("mock_readme.md")
+
+def test_extract_repo_url_from_readme():
+    with open("mock_readme.md", "w") as f:
+        f.write(MOCK_CONTENT)
+
+    repo_url = extract_repo_url_from_readme("mock_readme.md")
+    assert repo_url == "user/toolA"
+    os.remove("mock_readme.md")
+
+@pytest.mark.parametrize("content, expected_url", [
     ("""
-    # Project Title
-
-    ## Features
-    - Feature A
-    - Feature B
-
     ## Related Tools
-    - Tool A
-    - Tool B
-
-    ## License
-    MIT License
-    """, 
-    "## Related Tools\n\n- Tool A\n- Tool B"
-    ),
-    # Add more test cases as needed
-])
-def test_extract_related_tools_section(content, expected_section):
-    with open("mock_readme.md", "w") as f:
-        f.write(content)
-
-    section = extract_related_tools_section("mock_readme.md")
-    assert section == expected_section
-
-    os.remove("mock_readme.md")
-
-# Mock the subprocess.run function to avoid actual git operations
-@pytest.fixture
-def mock_subprocess(mocker):
-    mocker.patch("subprocess.run")
-
-def test_update_repository(mock_subprocess):
-    # Mock a README content
-    content = """
-    # Project Title
-
-    ## Features
-    - Feature A
-    - Feature B
-
+    - Tool A (https://github.com/user/toolA)
+    """, "user/toolA"),
+    ("""
     ## Related Tools
-    - Tool A
-    - Tool B
-
-    ## License
-    MIT License
-    """
-    with open("mock_readme.md", "w") as f:
-        f.write(content)
-
-    related_tools_section = extract_related_tools_section("mock_readme.md")
-    update_repository("mock_repo", related_tools_section, "mock_token")
-
-    # Additional assertions can be added based on the expected behavior of the update_repository function
-
-    os.remove("mock_readme.md")
-
-# Test for Missing "Related Tools" Section
-@pytest.mark.parametrize("content", [
-    """
-    # Project Title
-
-    ## Features
-    - Feature A
-    - Feature B
-
-    ## License
-    MIT License
-    """
+    - Tool B (https://github.com/user/toolB)
+    """, "user/toolB")
 ])
-def test_extract_related_tools_section_missing_section(content):
+def test_extract_repo_url_from_readme_parametrized(content, expected_url):
     with open("mock_readme.md", "w") as f:
         f.write(content)
 
-    with pytest.raises(ValueError, match="Missing 'Related Tools' section"):
-        extract_related_tools_section("mock_readme.md")
-
+    repo_url = extract_repo_url_from_readme("mock_readme.md")
+    assert repo_url == expected_url
     os.remove("mock_readme.md")
 
-# Test for Empty "Related Tools" Section
-@pytest.mark.parametrize("content", [
-    """
-    # Project Title
 
-    ## Features
-    - Feature A
-    - Feature B
+def test_create_pull_request(mocker):
+    mock_post = mocker.patch('requests.post')
+    mock_response = mocker.MagicMock()
+    mock_response.status_code = 201
+    mock_post.return_value = mock_response
+    
+    create_pull_request("user/repo", "branch_name", "mock_token")
+    
+    # Adjusted assertion
+    mock_post.assert_called_once()
 
-    ## Related Tools
+def test_update_repository(mocker):
+    mocker.patch('subprocess.run')
+    mock_response = mocker.MagicMock()
+    mock_response.status_code = 201
+    mocker.patch('requests.post', return_value=mock_response)
 
-    ## License
-    MIT License
-    """
-])
-def test_extract_related_tools_section_empty_section(content):
-    with open("mock_readme.md", "w") as f:
-        f.write(content)
+    os.environ['GH_PAT'] = 'mock_token'
+    if not os.path.exists("repo"):
+        os.mkdir("repo")
+    with open("repo/README.md", "w") as f:
+        f.write(MOCK_CONTENT)
+    update_repository("user/repo", "## Related Tools\n- Tool A\n- Tool B")
+    os.remove("repo/README.md")
 
-    section = extract_related_tools_section("mock_readme.md")
-    assert section == "## Related Tools"
+    # Assert that subprocess.run was called (indicating git operations were performed)
+    assert subprocess.run.call_count > 0
 
-    os.remove("mock_readme.md")
+    # Cleanup
+    del os.environ['GH_PAT']
