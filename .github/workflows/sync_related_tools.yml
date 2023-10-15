@@ -23,28 +23,29 @@ jobs:
         run: |
           while read -r repo; do
             echo "Processing $repo"
-            rm -rf temp_repo  # Ensure the directory doesn't exist
-            git clone "https://github.com/m-c-frank/$repo.git" temp_repo
-            cd temp_repo
+            git clone "https://github.com/m-c-frank/$repo.git" $repo
+            cd $repo
             python ../scripts/update_readme.py
             cd ..
-            rm -rf temp_repo  # Clean up after processing
           done < repos.txt
-
       - name: Check for changes, commit, push, and create PR
         run: |
-          while read -r repo; do
-            cd temp_repo
-            if git diff --exit-code; then
-              echo "No changes to commit for $repo"
+            while read -r repo; do
+              cd $repo
+              if git diff --exit-code; then
+                echo "No changes to commit for $repo"
+                cd ..
+                continue
+              fi
+              git checkout -b related-tools-update
+              git commit -am 'Update Related Tools section from Gist'
+              git push "https://${{ secrets.GH_PAT }}@github.com/m-c-frank/$repo.git" related-tools-update
+              gh pr create --title "Update Related Tools section from Gist" --body "Automated update of the Related Tools section." --head related-tools-update --base main
               cd ..
-              rm -rf temp_repo
-              continue
-            fi
-            git checkout -b related-tools-update
-            git commit -am 'Update Related Tools section from Gist'
-            git push "https://${{ secrets.GH_PAT }}@github.com/m-c-frank/$repo.git" related-tools-update
-            gh pr create --title "Update Related Tools section from Gist" --body "Automated update of the Related Tools section." --head related-tools-update --base main
-            cd ..
-            rm -rf temp_repo
-          done < repos.txt
+            done < repos.txt
+  
+      - name: Cleanup cloned repositories
+        run: |
+            while read -r repo; do
+            rm -rf $repo
+            done < repos.txt
