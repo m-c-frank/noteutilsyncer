@@ -14,6 +14,12 @@ def extract_related_tools_section(filename):
     start_index = content.find(start_tag)
     end_index = content.find(end_tag)
 
+    # Logging the positions of the tags and a snippet of the content for debugging
+    print(f"Start tag '{start_tag}' found at index: {start_index}")
+    print(f"End tag '{end_tag}' found at index: {end_index}")
+    print(f"Content snippet around start tag: {content[max(0, start_index-30):start_index+30]}")
+    print(f"Content snippet around end tag: {content[max(0, end_index-30):end_index+30]}")
+
     if start_index == -1 or end_index == -1:
         raise ValueError(f"Missing section between {start_tag} and {end_tag}")
 
