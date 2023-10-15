@@ -23,10 +23,12 @@ jobs:
         run: |
           while read -r repo; do
             echo "Processing $repo"
+            rm -rf temp_repo  # Ensure the directory doesn't exist
             git clone "https://github.com/m-c-frank/$repo.git" temp_repo
             cd temp_repo
             python ../scripts/update_readme.py
             cd ..
+            rm -rf temp_repo  # Clean up after processing
           done < repos.txt
 
       - name: Check for changes, commit, push, and create PR
