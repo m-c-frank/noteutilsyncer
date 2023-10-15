@@ -1,26 +1,31 @@
-name: Sync READMEs in Note Utilities Ecosystem
+name: Synchronize Related Tools Section
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'READMEs/*.md'
+      - 'README.md'
 
 jobs:
-  sync-readmes:
+  synchronize:
     runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
 
-    - name: Setup GitHub CLI
-      uses: cli/cli/setup-gh@v1
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11'
 
-    - name: Run NoteUtilSyncer
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # Install any other dependencies if needed
+
+    - name: Run sync.py script
+      run: python sync.py
       env:
         GH_PAT: ${{ secrets.GH_PAT }}
-      run: |
-        chmod +x sync.sh
-        ./sync.sh
