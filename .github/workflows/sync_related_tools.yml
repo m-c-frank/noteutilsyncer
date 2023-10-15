@@ -31,23 +31,24 @@ jobs:
           done < repos.txt
       - name: Check for changes, commit, push, and create PR
         run: |
-            while read -r repo; do
-              cd $repo
-              if git diff --exit-code; then
-                echo "No changes to commit for $repo"
+              while read -r repo; do
+                cd $repo
+                if git diff --exit-code; then
+                  echo "No changes to commit for $repo"
+                  cd ..
+                  continue
+                fi
+                # Set Git user configurations
+                git config user.email "relatedworkupdater@github.com"
+                git config user.name "Related Work Updater"
+                git checkout -b related-tools-update
+                git commit -am 'Update Related Tools section from Gist'
+                # Forcefully push the branch
+                git push --force "https://${{ secrets.GH_PAT }}@github.com/m-c-frank/$repo.git" related-tools-update
+                gh pr create --title "Update Related Tools section from Gist" --body "Automated update of the Related Tools section." --head related-tools-update --base main
                 cd ..
-                continue
-              fi
-              # Set Git user configurations
-              git config user.email "action@github.com"
-              git config user.name "GitHub Action"
-              git checkout -b related-tools-update
-              git commit -am 'Update Related Tools section from Gist'
-              git push "https://${{ secrets.GH_PAT }}@github.com/m-c-frank/$repo.git" related-tools-update
-              gh pr create --title "Update Related Tools section from Gist" --body "Automated update of the Related Tools section." --head related-tools-update --base main
-              cd ..
-            done < repos.txt
-    
+              done < repos.txt
+            
       - name: Cleanup cloned repositories
         run: |
             while read -r repo; do
