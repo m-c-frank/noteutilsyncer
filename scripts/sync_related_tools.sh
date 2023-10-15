@@ -8,20 +8,23 @@ sed -n '/<!--START_TAG-->/, /<!--END_TAG-->/p' README.md > current_related_tools
 
 # Compare the Gist content with the current section
 if ! diff gist_related_tools.txt current_related_tools.txt; then
-    # Update the README
-    sed -i '/<!--START_TAG-->/, /<!--END_TAG-->/c\<!--START_TAG-->\n'$(cat gist_related_tools.txt)'\n<!--END_TAG-->' README.md
-    git config --global user.name 'GitHub Action'
-    git config --global user.email 'action@github.com'
+  # Update the README of main repository
+  sed -i '/<!--START_TAG-->/, /<!--END_TAG-->/c\<!--START_TAG-->\n'$(cat gist_related_tools.txt)'\n<!--END_TAG-->' README.md
+  git config --global user.name 'GitHub Action'
+  git config --global user.email 'action@github.com'
+  git add README.md
+  git commit -m 'Update Related Tools section from Gist'
+  git push https://${GH_PAT}@github.com/m-c-frank/noteutilsyncer.git
+  
+  # Loop through each related tool and update its README
+  while IFS= read -r repo_name; do
+    git clone "https://github.com/m-c-frank/${repo_name}.git"
+    cd "${repo_name}"
+    sed -i '/<!--START_TAG-->/, /<!--END_TAG-->/c\<!--START_TAG-->\n'$(cat ../gist_related_tools.txt)'\n<!--END_TAG-->' README.md
     git add README.md
     git commit -m 'Update Related Tools section from Gist'
-    git push
-
-    # Update related repositories' READMEs
-    for repo in $(cat gist_related_tools.txt); do
-    python scripts/utils.py update_repo_readme $repo
-    done
-
-
-    # Extract repo URLs and update them
-    python scripts/utils.py
+    git push https://${GH_PAT}@github.com/m-c-frank/${repo_name}.git
+    cd ..
+    rm -rf "${repo_name}"  # Cleanup
+  done < gist_related_tools.txt
 fi
