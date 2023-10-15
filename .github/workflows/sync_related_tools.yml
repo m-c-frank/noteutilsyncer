@@ -40,4 +40,3 @@ jobs:
             gh pr create --title "Update Related Tools section from Gist" --body "Automated update of the Related Tools section." --head related-tools-update --base main
             cd ..
             rm -rf temp_repo
-          done < ../repos.txt
