@@ -18,12 +18,13 @@ def fetch_gist_content():
     return repos
 
 
-def main():
+def main(repo_file_path="repos.txt", description_file_path="descriptions.txt"):
     print("Fetching gist content...")
     repos = fetch_gist_content()
-    with open("repos.txt", "w") as f:
-        for repo, _ in repos:
-            f.write(f"{repo}\n")
+    with open(repo_file_path, "w") as repo_file, open(description_file_path, "w") as desc_file:
+        for repo, description in repos:
+            repo_file.write(f"{repo}\n")
+            desc_file.write(f"{description}\n")
 
 if __name__ == "__main__":
     main()

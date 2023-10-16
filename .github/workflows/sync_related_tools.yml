@@ -18,7 +18,7 @@ jobs:
         run: sudo apt-get install gh
 
       - name: Fetch list of repositories
-        run: python scripts/fetch_gist_repos.py
+        run: python noteutilsyncer/fetch_gist_repos.py
 
       - name: Clone and update each repository
         run: |
@@ -26,7 +26,7 @@ jobs:
             echo "Processing $repo"
             git clone "https://github.com/m-c-frank/$repo.git" $repo
             cd $repo
-            python ../scripts/update_readme.py
+            python ../noteutilsyncer/update_readme.py
             cd ..
           done < repos.txt
       - name: Check for changes, commit, push, and create PR
