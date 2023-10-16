@@ -9,11 +9,14 @@ def fetch_gist_content():
     lines = response.text.strip().split('\n')
     repos = []
     for line in lines:
-        repo, description = line.split(",", 1)
-        repo, description = repo.strip("'"), description.strip("'")
+        # Splitting based on the first comma
+        parts = line.split(',', 1)
+        repo = parts[0].strip("'").strip()
+        description = parts[1].strip("'").strip() if len(parts) > 1 else ""
         print(f"Processed: Repo - {repo}, Description - {description}")
         repos.append((repo, description))
     return repos
+
 
 def main():
     print("Fetching gist content...")
