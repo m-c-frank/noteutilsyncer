@@ -22,13 +22,19 @@ jobs:
 
       - name: Clone and update each repository
         run: |
+          current_repo="$(basename "$GITHUB_REPOSITORY")"
           while read -r repo; do
-            echo "Processing $repo"
-            git clone "https://github.com/m-c-frank/$repo.git" $repo
-            cd $repo
-            python ../noteutilsyncer/update_readme.py
-            cd ..
+            if [ "$repo" != "$current_repo" ]; then
+              echo "Processing $repo"
+              git clone "https://github.com/m-c-frank/$repo.git" $repo
+              cd $repo
+              python ../noteutilsyncer/update_readme.py
+              cd ..
+            else
+              echo "Skipping current repo: $repo"
+            fi
           done < repos.txt
+                
       - name: Check for changes, commit, push, and create PR
         run: |
               while read -r repo; do
