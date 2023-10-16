@@ -60,7 +60,7 @@ Contributions to the `noteutilsyncer` project or the Note Utilities Ecosystem ar
 
 ## License
 
-The `noteutilsyncer` project is open-source and available under the [GOS License](LICENSE.md).
+The `noteutilsyncer` project is open-source and available under the [GOS License](https://github.com/m-c-frank/noteutilsyncer/blob/main/LICENCE.md).
 
 ## Credits
 
