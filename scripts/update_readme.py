@@ -1,4 +1,5 @@
 def create_related_tools_section(repos):
+    print(repos)
     formatted_tools = "\n".join([f"- **[{name}](https://github.com/m-c-frank/{name})** - {description}" for name, description in repos])
     section = f"<!--START_TOKEN-->\n**Note Utilities Ecosystem**: A suite of tools designed to streamline and enhance your note-taking and information processing workflows.\n\n{formatted_tools}\n<!--END_TOKEN-->"
     return section
@@ -16,9 +17,11 @@ def update_readme(repos):
         f.write(updated_content)
 
 def main():
+    print("Reading repos.txt...")
     with open("../repos.txt", "r") as f:
         repos = [(line.strip(), "") for line in f.readlines()]
 
+    print(f"Updating README.md with the following repos: {repos}")
     update_readme(repos)
 
 if __name__ == "__main__":
