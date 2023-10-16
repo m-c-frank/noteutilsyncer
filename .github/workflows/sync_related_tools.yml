@@ -69,7 +69,7 @@ jobs:
       
                 cd ..
               done < repos.txt
-              - name: Cleanup cloned repositories
+      - name: Cleanup cloned repositories
         run: |
             while read -r repo; do
             rm -rf $repo
